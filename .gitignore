@@ -11,3 +11,6 @@
 
 # Unignore directories
 !*/
+
+# Jetbrains
+.idea/
