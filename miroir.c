@@ -33,22 +33,34 @@ int main(int argc, char **argv) {
         fd_in = open(argv[1], O_RDONLY | O_BINARY);
         if(fd_in >= 0) {
             fd_out = open(argv[2], O_RDWR | O_CREAT | O_TRUNC | O_BINARY, 0644);
+            int nbPerPixel = 1;
+            int width, height;
             for(int i = 0; i < 3; i++) {
                 nbRead = lireligne(fd_in, buffer, 15);
                 write(fd_out, buffer, nbRead);
+                if(i == 0 && strcmp(buffer, "P6"))
+                    nbPerPixel = 3;
+                if(i == 1) {
+                    int space_c = 0;
+                    while (space_c < nbRead && buffer[space_c] != ' ')
+                        space_c++;
+                    height = atoi(buffer + space_c);
+                    buffer[space_c] = '\0';
+                    width = atoi(buffer);
+                }
             }
 
             if(nbRead > 0) {
                 do {
-                    nbRead = read(fd_in, buffer, 4096);
+                    nbRead = read(fd_in, buffer, width * nbPerPixel);
                     if (nbRead >= 0) {
-                        for(int i = 0; i < nbRead; i++) {
-                            int nVal = buffer[i] + atoi(argv[3]);
-                            if(nVal > 255)
-                                nVal -= 256;
-                            else if(nVal < 0)
-                                nVal += 256;
-                            buffer[i] = nVal;
+                        for(int i = 0; i < nbRead/2; i+=nbPerPixel) {
+                            for(int j = 0; j < nbPerPixel; j++) {
+                                int pixel_left = buffer[i+j];
+                                int pixel_right = buffer[nbRead - 1 - (i+j)];
+                                buffer[i+j] = pixel_right;
+                                buffer[nbRead - 1 - (i+j)] = pixel_left;
+                            }
                         }
                         write(fd_out, buffer, nbRead);
                     } else {

@@ -34,7 +34,6 @@ int main(int argc, char **argv) {
         fd_in = open(argv[1], O_RDONLY | O_BINARY);
         if(fd_in >= 0) {
             fd_out = open(argv[2], O_RDWR | O_CREAT | O_TRUNC | O_BINARY, 0644);
-            unsigned char info[3][15];
             for(int i = 0; i < 3; i++) {
                 nbRead = lireligne(fd_in, buffer, 15);
                 write(fd_out, buffer, nbRead);
