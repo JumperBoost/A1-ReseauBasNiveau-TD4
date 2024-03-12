@@ -51,23 +51,44 @@ int main(int argc, char **argv) {
             }
 
             if(nbRead > 0) {
-                do {
-                    nbRead = read(fd_in, buffer, width * nbPerPixel);
-                    if (nbRead >= 0) {
-                        for(int i = 0; i < nbRead/2; i+=nbPerPixel) {
-                            for(int j = 0; j < nbPerPixel; j++) {
-                                int pixel_left = buffer[i+j];
-                                int pixel_right = buffer[nbRead - 1 - (i+j)];
-                                buffer[i+j] = pixel_right;
-                                buffer[nbRead - 1 - (i+j)] = pixel_left;
+                if(strcmp(argv[3], "-v") == 0) {
+                    do {
+                        nbRead = read(fd_in, buffer, width * nbPerPixel);
+                        if (nbRead >= 0) {
+                            for (int i = 0; i < nbRead/2; i += nbPerPixel) {
+                                for (int j = 0; j < nbPerPixel; j++) {
+                                    int pixel_left = buffer[i + j];
+                                    int pixel_right = buffer[nbRead-nbPerPixel - i + j];
+                                    buffer[i + j] = pixel_right;
+                                    buffer[nbRead-nbPerPixel - i + j] = pixel_left;
+                                }
+                            }
+                            write(fd_out, buffer, nbRead);
+                        } else {
+                            perror("Une erreur est survenue lors de la lecture verticale du fichier source.");
+                            exit(1);
+                        }
+                    } while (nbRead > 0);
+                } else if(strcmp(argv[3], "-h") == 0) {
+                    unsigned char *buffer2 = malloc(height * width * nbPerPixel * sizeof (unsigned char));
+                    nbRead = read(fd_in, buffer2, height * width * nbPerPixel);
+                    if(nbRead >= 0) {
+                        for(int i = 0; i < height / 2; i++) {
+                            for(int j = 0; j < width*nbPerPixel; j+=nbPerPixel) {
+                                for(int k = 0; k < nbPerPixel; k++) {
+                                    int pixel_up = buffer2[i * width * nbPerPixel + j+k];
+                                    int pixel_down = buffer2[(height - 1 - i) * width * nbPerPixel + j+k];
+                                    buffer2[i * width * nbPerPixel + j+k] = pixel_down;
+                                    buffer2[(height - 1 - i) * width * nbPerPixel + j+k] = pixel_up;
+                                }
                             }
                         }
-                        write(fd_out, buffer, nbRead);
+                        write(fd_out, buffer2, nbRead);
                     } else {
-                        perror("Une erreur est survenue lors de la lecture de fichier source.");
+                        perror("Une erreur est survenue lors de la lecture horizontale du fichier source.");
                         exit(1);
                     }
-                } while (nbRead > 0);
+                }
             } else {
                 perror("Une erreur est survenue lors de la lecture de fichier source.");
                 exit(1);
