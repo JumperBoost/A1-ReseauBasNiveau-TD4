@@ -1,3 +1,5 @@
+![](resources/logo.jpeg)
+
 # TD n°4 - Manipulation de fichiers
 
 Dans ce TD nous allons utiliser les appels systèmes d'entrée/sortie pour manipuler des fichiers représentant des images et des sons.
